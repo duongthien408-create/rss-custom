@@ -5,12 +5,6 @@ Script để lấy nội dung tin tức từ https://www.trendforce.com/news/
 
 import sys
 import io
-
-# Fix encoding for Windows console
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -216,6 +210,11 @@ class TrendForceScraper:
 
 def main():
     """Hàm chính để chạy script"""
+    # Fix encoding for Windows console
+    if sys.platform == 'win32':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
     scraper = TrendForceScraper()
 
     # Ví dụ 1: Scrape trang đầu tiên
