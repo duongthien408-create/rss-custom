@@ -8,6 +8,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Global state
 let allArticles = [];
 let filteredArticles = [];
+let currentSourceFilter = 'all'; // 'all', 'news', 'presscenter'
 
 // DOM Elements
 const loadingState = document.getElementById('loadingState');
@@ -30,6 +31,52 @@ function setupEventListeners() {
     searchInput.addEventListener('input', debounce(handleSearch, 300));
     sortSelect.addEventListener('change', handleSort);
     refreshBtn.addEventListener('click', loadArticles);
+
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const filter = e.currentTarget.dataset.filter;
+            handleSourceFilter(filter);
+        });
+    });
+}
+
+// Handle source filter
+function handleSourceFilter(source) {
+    currentSourceFilter = source;
+
+    // Update active tab
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-filter="${source}"]`).classList.add('active');
+
+    // Apply filter
+    applyFilters();
+}
+
+// Apply all filters (source + search)
+function applyFilters() {
+    let articles = [...allArticles];
+
+    // Apply source filter
+    if (currentSourceFilter !== 'all') {
+        articles = articles.filter(a => (a.source || 'news') === currentSourceFilter);
+    }
+
+    // Apply search filter
+    const query = searchInput.value.toLowerCase().trim();
+    if (query) {
+        articles = articles.filter(article =>
+            article.title.toLowerCase().includes(query) ||
+            (article.title_vi && article.title_vi.toLowerCase().includes(query)) ||
+            (article.summary && article.summary.toLowerCase().includes(query)) ||
+            (article.summary_vi && article.summary_vi.toLowerCase().includes(query))
+        );
+    }
+
+    filteredArticles = articles;
+    renderArticles();
 }
 
 // Load articles from Supabase
@@ -46,10 +93,10 @@ async function loadArticles() {
         if (error) throw error;
 
         allArticles = data || [];
-        filteredArticles = [...allArticles];
 
+        updateSourceCounts();
+        applyFilters();
         updateStats();
-        renderArticles();
         updateLastUpdate();
 
         hideLoading();
@@ -58,6 +105,17 @@ async function loadArticles() {
         console.error('Error loading articles:', error);
         showError(error.message);
     }
+}
+
+// Update source counts in filter tabs
+function updateSourceCounts() {
+    const newsCount = allArticles.filter(a => (a.source || 'news') === 'news').length;
+    const pressCount = allArticles.filter(a => (a.source || 'news') === 'presscenter').length;
+    const totalCount = allArticles.length;
+
+    document.getElementById('countAll').textContent = totalCount;
+    document.getElementById('countNews').textContent = newsCount;
+    document.getElementById('countPress').textContent = pressCount;
 }
 
 // Render articles to the grid
@@ -75,6 +133,7 @@ function renderArticles() {
 // Create article card HTML
 function createArticleCard(article) {
     const date = formatDate(article.date);
+    const source = article.source || 'news';
 
     // Ưu tiên hiển thị tiếng Việt, fallback sang tiếng Anh
     const title = article.title_vi || article.title;
@@ -85,6 +144,11 @@ function createArticleCard(article) {
     // Hiển thị badge nếu có bản dịch tiếng Việt
     const hasVietnamese = article.title_vi || article.summary_vi;
 
+    // Source badge color
+    const sourceBadge = source === 'presscenter'
+        ? '<span class="badge source-badge bg-purple-100 text-purple-700">📰 Press Release</span>'
+        : '<span class="badge source-badge bg-blue-100 text-blue-700">🗞️ News</span>';
+
     return `
         <article class="bg-white rounded-lg shadow card-hover overflow-hidden">
             ${article.thumbnail ? `
@@ -92,10 +156,8 @@ function createArticleCard(article) {
             ` : ''}
 
             <div class="p-6">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="badge bg-blue-100 text-primary">
-                        📰 ${category}
-                    </span>
+                <div class="flex items-center gap-2 mb-3 flex-wrap">
+                    ${sourceBadge}
                     ${hasVietnamese ? `
                         <span class="badge bg-green-100 text-green-700">
                             🇻🇳 Tiếng Việt
@@ -136,20 +198,7 @@ function createArticleCard(article) {
 
 // Handle search
 function handleSearch(e) {
-    const query = e.target.value.toLowerCase().trim();
-
-    if (!query) {
-        filteredArticles = [...allArticles];
-    } else {
-        filteredArticles = allArticles.filter(article =>
-            article.title.toLowerCase().includes(query) ||
-            (article.title_vi && article.title_vi.toLowerCase().includes(query)) ||
-            (article.summary && article.summary.toLowerCase().includes(query)) ||
-            (article.summary_vi && article.summary_vi.toLowerCase().includes(query))
-        );
-    }
-
-    renderArticles();
+    applyFilters();
 }
 
 // Handle sort
@@ -176,12 +225,14 @@ function updateStats() {
     const total = allArticles.length;
     const today = allArticles.filter(a => isToday(a.date)).length;
     const thisWeek = allArticles.filter(a => isThisWeek(a.date)).length;
-    const categories = new Set(allArticles.map(a => a.category).filter(Boolean)).size;
+
+    // Count unique sources instead of categories
+    const sources = new Set(allArticles.map(a => a.source || 'news')).size;
 
     document.getElementById('totalArticles').textContent = total;
     document.getElementById('todayArticles').textContent = today;
     document.getElementById('weekArticles').textContent = thisWeek;
-    document.getElementById('categories').textContent = categories || 'N/A';
+    document.getElementById('categories').textContent = sources;
 }
 
 // Update last update time
