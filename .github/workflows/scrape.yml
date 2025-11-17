@@ -2,8 +2,8 @@ name: Daily TrendForce Scrape
 
 on:
   schedule:
-    # Chạy lúc 9:00 AM UTC mỗi ngày (4:00 PM ICT / 5:00 PM Hanoi)
-    - cron: '0 9 * * *'
+    # Chạy lúc 15:00 UTC mỗi ngày (22:00 / 10:00 PM giờ Việt Nam)
+    - cron: '0 15 * * *'
 
   # Cho phép chạy thủ công từ Actions tab
   workflow_dispatch:
