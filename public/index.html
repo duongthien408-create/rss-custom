@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendForce News - Tech Industry Insights</title>
+    <meta name="description" content="Latest semiconductor, memory, and tech industry news from TrendForce">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .skeleton {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">TrendForce News</h1>
+                    <p class="text-blue-100">Latest semiconductor & tech industry insights</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-blue-100">Last updated</p>
+                    <p class="text-lg font-semibold" id="lastUpdate">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-primary" id="totalArticles">-</p>
+                    <p class="text-sm text-gray-600">Total Articles</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-green-600" id="todayArticles">-</p>
+                    <p class="text-sm text-gray-600">Today</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-purple-600" id="weekArticles">-</p>
+                    <p class="text-sm text-gray-600">This Week</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-orange-600" id="categories">-</p>
+                    <p class="text-sm text-gray-600">Categories</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search articles..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                </div>
+                <div>
+                    <select
+                        id="sortSelect"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                        <option value="date_desc">Newest First</option>
+                        <option value="date_asc">Oldest First</option>
+                        <option value="title">Title A-Z</option>
+                    </select>
+                </div>
+                <div>
+                    <button
+                        id="refreshBtn"
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                        🔄 Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-12">
+
+        <!-- Loading State -->
+        <div id="loadingState" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Skeleton cards -->
+            <div class="bg-white rounded-lg shadow p-6 skeleton">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div class="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 skeleton">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div class="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 skeleton">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div class="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+        </div>
+
+        <!-- Articles Grid -->
+        <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+            <!-- Articles will be inserted here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12 hidden">
+            <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">No articles found</h3>
+            <p class="mt-2 text-gray-500">Try adjusting your search or filters</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="text-center py-12 hidden">
+            <svg class="mx-auto h-24 w-24 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">Error loading articles</h3>
+            <p class="mt-2 text-gray-500" id="errorMessage"></p>
+            <button onclick="loadArticles()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                Try Again
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400">
+                Data sourced from <a href="https://www.trendforce.com" target="_blank" class="text-blue-400 hover:underline">TrendForce</a>
+            </p>
+            <p class="text-gray-500 text-sm mt-2">
+                Built with ❤️ using Supabase & Vercel
+            </p>
+        </div>
+    </footer>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Main Script -->
+    <script src="app.js"></script>
+</body>
+</html>

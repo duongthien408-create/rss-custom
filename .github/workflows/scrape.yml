@@ -1,0 +1,47 @@
+name: Daily TrendForce Scrape
+
+on:
+  schedule:
+    # Chạy lúc 9:00 AM UTC mỗi ngày (4:00 PM ICT / 5:00 PM Hanoi)
+    - cron: '0 9 * * *'
+
+  # Cho phép chạy thủ công từ Actions tab
+  workflow_dispatch:
+
+jobs:
+  scrape-to-supabase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🚀 Run scraper and save to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python -c "
+          from supabase_scraper import SupabaseScraper
+          scraper = SupabaseScraper()
+          result = scraper.scrape_and_save(start_page=1, end_page=5)
+          print(f'✅ Thành công! Inserted: {result[\"inserted\"]}, Skipped: {result[\"skipped\"]}')
+          "
+
+      - name: 📊 Summary
+        run: |
+          echo "### Scrape Summary 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Scraper completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- 📅 Time: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🗄️ Data saved to Supabase" >> $GITHUB_STEP_SUMMARY
