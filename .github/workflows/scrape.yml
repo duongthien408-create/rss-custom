@@ -32,6 +32,8 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           python -c "
+          import sys
+          sys.path.insert(0, 'scripts')
           from supabase_scraper import SupabaseScraper
           scraper = SupabaseScraper()
           result = scraper.scrape_and_save(start_page=1, end_page=5)
