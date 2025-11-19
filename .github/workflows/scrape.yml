@@ -33,9 +33,10 @@ jobs:
         run: |
           python -c "
           import sys
+          import os
           sys.path.insert(0, 'scripts')
           from supabase_scraper import SupabaseScraper
-          scraper = SupabaseScraper()
+          scraper = SupabaseScraper(os.environ['SUPABASE_URL'], os.environ['SUPABASE_KEY'])
           result = scraper.scrape_and_save(start_page=1, end_page=5)
           print(f'✅ Thành công! Inserted: {result[\"inserted\"]}, Skipped: {result[\"skipped\"]}')
           "
